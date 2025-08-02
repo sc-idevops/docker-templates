@@ -1,0 +1,40 @@
+services:
+  wordpress:
+    image: wordpress
+    container_name: ${WPNAME}-wordpress
+    restart: always
+    ports:
+      - ${PORT}:80
+    environment:
+      WORDPRESS_DB_HOST: ${WPNAME}-wpdb
+      WORDPRESS_DB_USER: wpress
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: wpress
+    volumes:
+      - ./wordpress:/var/www/html
+    networks:
+      - caddy
+    labels:
+      caddy: ${WPNAME}.theheart.land
+      caddy.reverse_proxy: "{{upstreams 80}}"
+
+  wpdb:
+    image: mysql:8.0
+    restart: always
+    container_name: ${WPNAME}-wpdb
+    environment:
+      MYSQL_DATABASE: wpress
+      MYSQL_USER: wpress
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+    volumes:
+      - ./db:/var/lib/mysql
+      - ./db/conf/:/etc/mysql/conf.d/
+    networks:
+      caddy:
+        aliases: 
+          - ${WPNAME}-wpdb
+networks:
+  caddy:
+    external: true
+
