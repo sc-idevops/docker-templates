@@ -1,7 +1,8 @@
 services:
-  wordpress:
+  wordpress-${WPNAME}:
     image: wordpress
-    container_name: ${WPNAME}-wordpress
+    container_name: wordpress-${WPNAME}
+    user: 1000:1000
     restart: always
     ports:
       - ${PORT}:80
@@ -11,14 +12,16 @@ services:
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_NAME: wpress
     volumes:
-      - ./wordpress:/var/www/html
+      - ./wpdata:/var/www/html
     networks:
-      - caddy
+      caddy:
+        aliases: 
+          - wordpress-${WPNAME}
     labels:
       caddy: ${WPNAME}.theheart.land
       caddy.reverse_proxy: "{{upstreams 80}}"
 
-  wpdb:
+  wpdb-${WPNAME}:
     image: mysql:8.0
     restart: always
     container_name: ${WPNAME}-wpdb
